@@ -103,7 +103,7 @@ export default {
         ...mapGetters(['activeEditor', 'connections', 'history']),
     },
     methods: {
-        ...mapActions([]),
+        ...mapActions(['setActiveEditor']),
     },
     mounted() {
     },

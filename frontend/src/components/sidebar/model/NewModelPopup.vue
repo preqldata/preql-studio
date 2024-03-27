@@ -3,7 +3,7 @@
 <template>
     <v-dialog v-model="dialog" max-width="500" min-width=400>
         <template v-slot:activator="{ props }">
-            <v-btn class="tab-btn pa-0 ba-0 " v-bind="props" density="compact" block>
+            <v-btn class="tab-btn pa-0 ba-0 sidebar-create-button" v-bind="props" density="compact" block>
                 Create New Model
             </v-btn>
         </template>
@@ -30,6 +30,14 @@
 </template>
 <style scoped>
 .square-corners {
+    border-radius: 0 !important;
+}
+
+.sidebar-create-button {
+    height: 25px;
+    text-transform: none;
+    color: var(--text-lighter);
+    background-color: var(--main-bg-color);
     border-radius: 0 !important;
 }
 

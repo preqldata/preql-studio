@@ -4,7 +4,7 @@
             <div class="sidebar-selector-nav-item py-2 px-0">
                 <v-tooltip bottom>
                     <template v-slot:activator="{ props }">
-                        <v-btn v-bind="props" size="x-small" variant="outlined" @click.prevent="click(link.address)" :icon="link.icon">
+                        <v-btn v-bind="props" size="small" variant="outlined" @click.prevent="click(link.address)" :icon="link.icon">
                         </v-btn>
                     </template>
                     <span>{{ link.name }}</span>

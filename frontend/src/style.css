@@ -62,6 +62,14 @@ button:focus-visible {
   padding: 2em;
 }
 
+.square-corner {
+  border-radius: 0 !important;
+}
+
+.square-corners {
+  border-radius: 0 !important;
+}
+
 #app {
   max-width: 1280px;
   margin: 0 auto;
@@ -72,7 +80,7 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
-    background-color: #ffffff;
+    background-color: #1a1a1a;
   }
 
   a:hover {
@@ -112,15 +120,37 @@ button:focus-visible {
   align-items: 'center';
   text-align: 'center';
   height: 24px;
-
 }
 
-.tab-btn {
-  /* height: 30px; */
+
+.sidebar-action-button {
+  height: 30px !important;
+  width: 50px !important;
+  border-radius: 0 !important;
   text-transform: none;
   color: var(--text-lighter);
-  background-color: var(--main-bg-color);
+  /* background-color: var(--main-bg-color) !important;  */
 }
+
+.sidebar-detail-btn {
+  font-size: .2rem;
+  height: 10px;
+  width: 50px !important;
+  color: var(--text-lighter);
+  background-color: var(--main-bg-color);
+  border-radius: 0;
+}
+
+.sidebar-action-button-small {
+  height: 10px !important;
+  width: 10px !important;
+  border-radius: 0 !important;
+  text-transform: none;
+  color: var(--text-lighter);
+  /* background-color: var(--main-bg-color) !important;  */
+}
+
+/* button specifics */
 
 .tab-btn {
   height: 25px;
@@ -129,6 +159,7 @@ button:focus-visible {
   background-color: var(--main-bg-color);
   border-radius: 0;
 }
+
 
 /* This allows draggable gutters */
 .gutter {
@@ -141,6 +172,7 @@ button:focus-visible {
   }
   &.gutter-horizontal {
     width: 0!important;
+    background-color: transparent;
     cursor: ew-resize;
     &:after {
       height: 100%;

@@ -1,7 +1,7 @@
 
 
 <template>
-    <div class="editor-entry">
+    <div class="query-result">
         <v-tabs class="editor-tabs pa-0 ba-0" v-model="activeTab">
             <v-tab class="editor-tab" value="results">Results</v-tab>
             <v-tab v-if="editor.syntax === 'preql'" class="editor-tab" value="sql">SQL</v-tab>
@@ -57,13 +57,11 @@
 .sub-component-content {
     display: flex;
     flex-direction: column;
-    flex-grow: 0;
-    flex-shrink: 1;
-    /* flex-wrap: wrap; */
-    height: calc(100% - 30px);
+    flex: 1 1 100%;
+    height: 100%;
 }
 
-.editor-entry {
+.query-result {
     display: flex;
     flex-direction: column;
     flex-wrap: nowrap;

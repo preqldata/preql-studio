@@ -15,7 +15,6 @@
     justify-content: space-between;
     width: 100%;
     color: var(--text-lighter);
-
 }
 </style>
 <script lang="ts">

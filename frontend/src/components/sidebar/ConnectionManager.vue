@@ -6,7 +6,7 @@
         <div class="connection-list">
 
             <v-expansion-panels theme="dark">
-                <v-expansion-panel v-for="connection in connections" :key="connection.name">
+                <v-expansion-panel class="square-corner" v-for="connection in connections" :key="connection.name">
                     <v-expansion-panel-title>
                         <GlowingDot class="" v-if="connection.active" />
                         <div v-if="connection.model" class="pl-4">{{ connection.name }}
@@ -18,18 +18,25 @@
                     <v-expansion-panel-text>
                         <v-list-item @click="setActiveEditor(editor.name)" v-for="editor in editors[connection.name]"
                             class="editor-list">
+
                             {{ editor.name }}
-                            <v-btn v-if="editor.visible" @click="closeEditor(editor)" icon="mdi-close" class="detail-btn pl-2 ba-0 " density="compact"></v-btn>
+                            <span></span>
+                            <v-btn v-if="editor.visible" @click="closeEditor(editor)" icon="mdi-close"
+                                class="sidebar-detail-btn square-corner" density="compact">Close</v-btn>
+
+                            <EditEditorPopup class="sidebar-detail-btn square-corner" :name="editor.name"
+                                density="compact" :defaultConnection="connection.name" />
+
                         </v-list-item>
-                        <div class="d-flex flex-column align-center  pa-0">
-                            <v-toolbar height="24" extension-height="24" class="sidebar-button-list">
-                                <!-- <v-btn icon="mdi-format-align-left"></v-btn> -->
-                                <!-- <v-btn  density="compact"   icon="mdi-format-align-center"></v-btn> -->
-                                <!-- <v-btn @click="removeConnection(connection)"  density="compact" icon="mdi-cancel"></v-btn> -->
+                        <div v-if="connection.name != unconnectedLabel" class="d-flex flex-column align-center pa-0">
+
+                            <v-toolbar height="24" extension-height="24" class="sidebar-button-list align-center">
                                 <EditConnectionPopup :connection="connection" />
                                 <RemoveConnectionPopup :connection="connection" />
                                 <NewEditorPopup :defaultConnection="connection.name" />
-                                <v-btn @click="_ => refresh(connection)" icon="mdi-refresh" class="tab-btn pa-0 ba-0 " density="compact"></v-btn>
+                                <v-btn @click="_ => refresh(connection)" icon="mdi-refresh"
+                                    class="sidebar-action-button pa-0 ba-0" density="compact">
+                                </v-btn>
                             </v-toolbar>
 
                         </div>
@@ -45,16 +52,6 @@
     </div>
 </template>
 <style scoped>
-.detail-btn {
-    font-size: .4rem;
-    height: 10px;
-    width: 5px;
-    text-align: center;
-    vertical-align: middle;
-    text-transform: none;
-    color: var(--text-lighter);
-    background-color: var(--main-bg-color);
-}
 .opacity-light {
     opacity: 0.6;
     font-size: .6rem;
@@ -82,8 +79,6 @@
 
 }
 
-
-
 .editor-list {
     align-items: right;
     text-align: center;
@@ -99,8 +94,8 @@
     width: 100%;
     height: 100%;
     background-color: var(--light-bg-color-2);
-
 }
+
 .connection-list-item {
     height: 10px;
     font-size: 80%;
@@ -128,9 +123,10 @@
 import GlowingDot from '/src/components/generic/GlowingDot.vue';
 import NewConnectionPopup from '/src/components/sidebar/connections/NewConnectionPopup.vue';
 import NewEditorPopup from '/src/components/editor/NewEditorPopup.vue'
+import EditEditorPopup from '/src/components/editor/EditEditorPopup.vue'
 import RemoveConnectionPopup from '/src/components/sidebar/connections/RemoveConnectionPopup.vue'
 import EditConnectionPopup from '/src/components/sidebar/connections/EditConnectionPopup.vue'
-import {Connection} from '/src/models/Connection'
+import { Connection } from '/src/models/Connection'
 import { mapActions, mapGetters } from 'vuex';
 export default {
     name: "ConnectionManager",
@@ -139,19 +135,23 @@ export default {
         NewConnectionPopup,
         NewEditorPopup,
         RemoveConnectionPopup,
-        EditConnectionPopup
+        EditConnectionPopup,
+        EditEditorPopup,
     },
     data() {
         return {
         };
     },
     computed: {
-        ...mapGetters(['activeEditor', 'connections']),
+        ...mapGetters(['activeEditor', 'connections', 'unconnectedLabel']),
         editors() {
             let editors = {}
             this.connections.forEach((conn) => {
                 editors[conn.name] = this.$store.getters.editors.filter((editor) => {
                     return editor.connection == conn.name
+                })
+                editors[this.unconnectedLabel] = this.$store.getters.editors.filter((editor) => {
+                    return this.connections.map((conn) => conn.name).includes(editor.connection) == false
                 })
             })
             return editors
@@ -159,7 +159,7 @@ export default {
     },
     methods: {
         ...mapActions(['setActiveEditor', 'loadConnections', 'removeConnection', 'editConnection', 'closeEditor']),
-        refresh(connection:Connection) {
+        refresh(connection: Connection) {
             this.editConnection({
                 name: connection.name,
                 type: connection.type,

@@ -6,7 +6,8 @@
         <div v-else class="header">
             No active model
         </div>
-        <v-select theme="dark" variant="solo" density="compact" class="minimal-select" v-model="selectedModel"
+        <v-select theme="dark" variant="solo" density="compact" 
+        class="minimal-select" v-model="selectedModel"
             label="Change Connection Model" :items="models" item-title="name" @update:modelValue="changeConnectionModel">
         </v-select>
 
@@ -67,7 +68,7 @@
 <style local>
 .header {
     color: var(--text-lighter);
-    font-size: 1.0rem;
+    font-size: .8rem;
     height: 30px;
     min-height: 30px;
     line-height: 30px;

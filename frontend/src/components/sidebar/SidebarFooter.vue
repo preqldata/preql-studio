@@ -1,23 +1,17 @@
 <template>
     <FooterComponent>
-        <div v-if="connection" class="connection-display px-2 py-0 bg-black text-center w-100">
+        <span v-if="connection" class="connection-display flex-item">
             {{ name }} — <strong>{{ type }}</strong>
-        </div>
+        </span>
     </FooterComponent>
 </template>
 <style scoped>
-/* .footer {
-    --height: 25px;
-    height: var(--height)6
-    min-height: var(--height);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-
-
-} */
-
+.flex-item {
+    flex: 1;
+    /* Distribute available space evenly among the spans */
+    margin-right: 10px;
+    /* Optional: Add some spacing between spans */
+}
 .connection-display {
     font-size: 0.6rem;
 }

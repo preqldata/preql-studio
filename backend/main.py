@@ -28,6 +28,11 @@ from google.cloud import bigquery
 from google.oauth2 import service_account
 from preql.constants import DEFAULT_NAMESPACE
 from preql.core.enums import DataType, Purpose
+from preql.core.models import (
+    ProcessedQuery,
+    ProcessedQueryPersist,
+    ProcessedShowStatement,
+)
 from preql import Environment, Executor, Dialects
 from preql.parser import parse_text
 from pydantic import BaseModel, Field
@@ -40,6 +45,7 @@ from backend.io_models import ListModelResponse, Model, UIConcept
 from backend.models.helpers import flatten_lineage
 from duckdb_engine import *  # this is for pyinstaller
 from sqlalchemy_bigquery import *  # this is for pyinstaller
+from preql.executor import generate_result_set
 
 PORT = 5678
 
@@ -78,51 +84,27 @@ class InstanceSettings:
     models: Dict[str, Environment]
 
 
+allowed_origins = [
+    "app://.",
+]
+
+# if not IN_APP_CONFIG.validate:
+allowed_origins += [
+    "http://localhost:8080",
+    "http://localhost:8081",
+    "http://localhost:8090",
+]
+allow_origin_regex = "(app://.)|(http://localhost:[0-9]+)"
+
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    # allow_origins=[
-    #     "http://localhost:8080",
-    #     "http://localhost:8081",
-    #     "http://localhost:8090",
-    #     "app://.",
-    # ],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["Authorization"],
+    allow_origin_regex=allow_origin_regex,
 )
-
-
-def generate_default_duckdb():
-    duckdb = Environment()
-    executor = Executor(
-        dialect=Dialects.DUCK_DB,
-        engine=create_engine("duckdb:///:memory:"),
-        environment=duckdb,
-    )
-    return executor
-
-
-def generate_default_bigquery() -> Executor:
-    if os.path.isfile("/run/secrets/bigquery_auth"):
-        credentials = service_account.Credentials.from_service_account_file(
-            "/run/secrets/bigquery_auth",
-            scopes=["https://www.googleapis.com/auth/cloud-platform"],
-        )
-        project = credentials.project_id
-    else:
-        credentials, project = default()
-    client = bigquery.Client(credentials=credentials, project=project)
-    engine = create_engine(
-        f"bigquery://{project}/test_tables?user_supplied_client=True",
-        connect_args={"client": client},
-    )
-    executor = Executor(
-        dialect=Dialects.BIGQUERY,
-        engine=engine,
-        environment=deepcopy(public_models["bigquery.stack_overflow"]),
-    )
-    return executor
 
 
 CONNECTIONS: Dict[str, Executor] = {}
@@ -221,14 +203,16 @@ async def get_models() -> ListModelResponse:
                 continue
             final_concepts.append(
                 UIConcept(
-                    name=sconcept.name.split(".")[-1]
-                    if sconcept.namespace == DEFAULT_NAMESPACE
-                    else sconcept.name,
+                    name=(
+                        sconcept.name.split(".")[-1]
+                        if sconcept.namespace == DEFAULT_NAMESPACE
+                        else sconcept.name
+                    ),
                     datatype=sconcept.datatype,
                     purpose=sconcept.purpose,
-                    description=sconcept.metadata.description
-                    if sconcept.metadata
-                    else None,
+                    description=(
+                        sconcept.metadata.description if sconcept.metadata else None
+                    ),
                     namespace=sconcept.namespace,
                     key=skey,
                     lineage=flatten_lineage(sconcept, depth=0),
@@ -250,10 +234,10 @@ async def list_connections():
 
 
 @router.put("/connection")
-async def update_connection(connection: ConnectionInSchema):
+def update_connection(connection: ConnectionInSchema):
     # if connection.name not in CONNECTIONS:
     #     raise HTTPException(status_code=404, detail=f"Connection {connection.name} not found.")
-    return await create_connection(connection)
+    return create_connection(connection)
 
 
 @router.post("/connection")
@@ -366,7 +350,6 @@ def run_raw_query(query: QueryInSchema):
 @router.post("/query")
 def run_query(query: QueryInSchema):
     start = datetime.now()
-    # we need to use a deepcopy here to avoid mutation the model default
     executor = CONNECTIONS.get(query.connection)
     if not executor:
         raise HTTPException(
@@ -388,26 +371,58 @@ def run_query(query: QueryInSchema):
         compiled_sql = ""
         for statement in sql:
             # for UI execution, cap the limit
-            statement.limit = (
-                min(int(statement.limit), STATEMENT_LIMIT)
-                if statement.limit
-                else STATEMENT_LIMIT
-            )
-            compiled_sql = executor.generator.compile_statement(statement)
-            rs = executor.engine.execute(compiled_sql)
-            outputs = [
-                (
-                    col.name,
-                    QueryOutColumn(
-                        name=col.name.replace(".", "_")
-                        if col.namespace == DEFAULT_NAMESPACE
-                        else col.address.replace(".", "_"),
-                        purpose=col.purpose,
-                        datatype=col.datatype,
-                    ),
+            if isinstance(statement, ProcessedQuery):
+                statement.limit = (
+                    min(int(statement.limit), STATEMENT_LIMIT)
+                    if statement.limit
+                    else STATEMENT_LIMIT
                 )
-                for col in statement.output_columns
-            ]
+
+            if isinstance(statement, (ProcessedQuery, ProcessedQueryPersist)):
+                compiled_sql = executor.generator.compile_statement(statement)
+                rs = executor.engine.execute(compiled_sql)
+                outputs = [
+                    (
+                        col.name,
+                        QueryOutColumn(
+                            name=(
+                                col.name.replace(".", "_")
+                                if col.namespace == DEFAULT_NAMESPACE
+                                else col.address.replace(".", "_")
+                            ),
+                            purpose=col.purpose,
+                            datatype=col.datatype,
+                        ),
+                    )
+                    for col in statement.output_columns
+                ]
+            elif isinstance(statement, (ProcessedShowStatement)):
+                compiled_sql = executor.generator.compile_statement(
+                    statement.output_values[0]
+                )
+                outputs = [
+                    (
+                        col.name,
+                        QueryOutColumn(
+                            name=(
+                                col.name.replace(".", "_")
+                                if col.namespace == DEFAULT_NAMESPACE
+                                else col.address.replace(".", "_")
+                            ),
+                            purpose=col.purpose,
+                            datatype=col.datatype,
+                        ),
+                    )
+                    for col in statement.output_columns
+                ]
+                rs = generate_result_set(
+                    statement.output_columns,
+                    [
+                        executor.generator.compile_statement(x)
+                        for x in statement.output_values
+                        if isinstance(x, ProcessedQuery)
+                    ],
+                )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

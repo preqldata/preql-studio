@@ -10,11 +10,20 @@
                 <ModelManager v-if="activeSidebar == 'models'" />
             </div>
         </div>
-        <SidebarFooter />
+        <SidebarFooter class="footer" />
     </div>
 </template>
 
 <style scoped>
+
+.footer {
+  width: 100%;
+  min-height: 25;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
 .selector-sidebar {
     background-color: rgba(0, 0, 0, 0.695);
     width: 40px;

@@ -3,7 +3,7 @@
 <template>
     <v-dialog v-model="dialog" max-width="500" min-width=400>
         <template v-slot:activator="{ props }">
-            <v-btn class="tab-btn pa-0 ba-0" density="compact" icon="mdi-pencil" v-bind="props">
+            <v-btn class="sidebar-action-button pa-0 ba-0" density="compact" icon="mdi-pencil" v-bind="props">
             </v-btn>
         </template>
         <v-card theme="dark" class="mx-auto" min-width="344" title="Edit Connection">
@@ -37,17 +37,8 @@
         </v-card>
     </v-dialog>
 </template>
-<style scoped>
-.square-corner s {
-    border-radius: 0 !important;
-}
+<style scoped></style>
 
-.tab-btn {
-    text-transform: none;
-    color: var(--text-lighter);
-    background-color: var(--main-bg-color);
-}
-</style>
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
 import { getConnectionExtras } from './utility';

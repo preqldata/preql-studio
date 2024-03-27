@@ -1,36 +1,32 @@
 
 
 <template>
-    <v-dialog v-model="dialog" max-width="500" min-width=400>
+    <v-dialog v-model="dialog" max-width="500">
         <template v-slot:activator="{ props }">
-            <v-btn class="sidebar-action-button pa-0 ba-0" v-bind="props" density="compact" icon="mdi-plus"
-                v-shortkey.once="['ctrl', 'n']" @shortkey="showPopup()">
-                +
+            <v-btn class="sidebar-detail-btn square-corner"  v-bind="props" :density="density" icon="mdi-edit"
+             >
+                Edit
             </v-btn>
         </template>
-        <v-card theme="dark" class="mx-auto" min-width="344" title="New Editor">
+        <v-card theme="dark" class="mx-auto" min-width="344" :title="`Update ${name}`">
             <v-form v-model="form">
                 <v-container>
                     <v-form v-model="form">
-                        <v-text-field variant="solo" density="compact" :readonly="loading" :rules="[required]"
-                            v-model="name" label="Name" @keyup="handleEnterKey">
-                        </v-text-field>
-                        <v-divider></v-divider>
                         <v-select variant="solo" density="compact" :readonly="loading" :rules="[required]"
                             v-model="connection" label="Connection" :items="connections" item-title="name">
                         </v-select>
-                        <v-divider></v-divider>
+                        <!-- <v-divider></v-divider>
                         <v-select variant="solo" density="compact" :readonly="loading" :rules="[required]"
                             v-model="selectedType" label="Type" :items="editorTypes">
-                        </v-select>
+                        </v-select> -->
                     </v-form>
                 </v-container>
                 <v-divider></v-divider>
                 <v-alert class="mx-auto square-corners" color="warning" v-if="error">{{ error }}</v-alert>
                 <v-card-actions>
                     <v-spacer></v-spacer>
-                    <v-btn type="submit" :disabled="!form" :loading="loading" color="success" @click="localAddEditor">
-                        Add
+                    <v-btn  type="submit" :disabled="!form" :loading="loading" color="success" @click="localAddEditor">
+                        Save
                         <v-icon icon="mdi-chevron-right" end></v-icon>
                     </v-btn>
                 </v-card-actions>
@@ -39,9 +35,7 @@
     </v-dialog>
 </template>
 <style scoped>
-.square-corners {
-    border-radius: 0 !important;
-}
+
 </style>
 <script lang="ts">
 import { mapActions, mapGetters } from 'vuex';
@@ -55,9 +49,8 @@ export default {
             error: '',
             dialog: false,
             connection: this.defaultConnection,
-            name: '',
-            selectedType: 'preql',
-            editorTypes: ['preql', 'sql'],
+            // selectedType: 'preql',
+            // editorTypes: ['preql', 'sql'],
 
         };
     },
@@ -65,7 +58,10 @@ export default {
         defaultConnection: {
             type: String,
             default: null,
-        }
+           
+        },
+        density: String,
+        name: String
     },
     computed: {
         ...mapGetters(['connections', 'getConnectionByName', 'unconnectedLabel']),
@@ -80,25 +76,18 @@ export default {
         // console.log(this.connections)
     },
     methods: {
-        ...mapActions(['newEditor', 'setActiveEditor']),
+        ...mapActions(['editEditor', 'setActiveEditor']),
         showPopup() {
             this.dialog = true;
         },
-        handleEnterKey(event) {
-            if (event.keyCode === 13) {
-                this.localAddEditor();
-            }
-        },
         localAddEditor() {
             const fullConnection = this.getConnectionByName(this.connection)
-            this.newEditor({
+            this.editEditor({
                 name: this.name,
                 connection: fullConnection,
-                syntax: this.selectedType,
             }).then(() => {
                 this.setActiveEditor(this.name).then(() => {
                     this.dialog = false;
-                    this.name = '';
                 })
 
             }).catch((e) => {

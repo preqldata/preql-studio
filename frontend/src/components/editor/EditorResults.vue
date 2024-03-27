@@ -6,11 +6,18 @@
     <HintsComponent v-else-if="!editorData.executed"></HintsComponent>
     <QueryResult v-else :editor="editorData" :headers="editorData.results.headers" :results="editorData.results.data">
     </QueryResult>
-    <EditorFooter :loading="loading" :executed="editorData.executed" :length="editorData.results.data.length"
+    <EditorFooter class='footer'  :loading="loading" :executed="editorData.executed" :length="editorData.results.data.length"
         :duration="editorData.duration" />
 </template>
 
 <style scoped>
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
 .results-loading {
     height: 100%;
 }

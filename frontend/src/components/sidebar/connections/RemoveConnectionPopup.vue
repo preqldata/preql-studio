@@ -1,10 +1,9 @@
 <template>
     <v-dialog v-model="dialog" width="auto">
         <template v-slot:activator="{ props }">
-            <v-btn class="tab-btn pa-0 ba-0" density="compact" icon="mdi-cancel" v-bind="props">
+            <v-btn class="sidebar-action-button ph-4 ba-0" density="compact" icon="mdi-cancel" v-bind="props">
             </v-btn>
         </template>
-
         <v-card>
             <v-card-text>
                 Are you sure you want to remove this connection? This will remove any associated editors.
@@ -16,12 +15,7 @@
     </v-dialog>
 </template>
 <style scoped>
-.tab-btn {
-    /* height: 30px; */
-    text-transform: none;
-    color: var(--text-lighter);
-    background-color: var(--main-bg-color);
-}
+
 </style>
 <script lang="ts">
 import { mapActions } from 'vuex'

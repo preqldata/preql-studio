@@ -6,7 +6,6 @@
       </div>
       <div ref="content" class="nested-page-content pa-0" id="page-content">
         <EditorTabs />
-        <!-- <EditorComponent /> -->
       </div>
     </div>
   </div>
@@ -18,7 +17,18 @@
   flex-direction: column;
   width: 100%;
   height: 100%;
+}
 
+.sidebar {
+    background-color: var(--main-bg-color);
+    display: flex;
+    flex-direction: column;
+    flex-grow: 0;
+    flex-shrink: 1;
+    /* flex-wrap: wrap; */
+    height: 100%;
+    width: 100%;
+    z-index: 2;
 }
 
 .nested-page-content {
@@ -29,13 +39,7 @@
   overflow: hidden;
 }
 
-.interface {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  height: 100%;
-}
+
 
 .interface-wrap {
   display: flex;
@@ -43,6 +47,8 @@
   flex: 1 1 auto;
   max-height: 100%;
 }
+
+
 
 </style>
 <script lang="ts">

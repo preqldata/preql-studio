@@ -75,6 +75,7 @@ export class Editor implements EditorInterface {
         try {
             let info = { connection: local.connection, query: local.contents };
             await instance.post('query', info).then(function (response) {
+                local.status_code = 200;
                 const columnMap = new Map();
                 for (const [key, value] of response.data.columns) {
                     columnMap.set(key, value);
@@ -89,7 +90,7 @@ export class Editor implements EditorInterface {
         } catch (error) {
             if (error instanceof Error) {
                 const resultCode = axiosHelpers.getResultCode(error);
-                this.status_code = resultCode;
+                local.status_code = resultCode;
                 local.error = axiosHelpers.getErrorMessage(error);
                 local.duration = null;
                 local.executed = false;
@@ -155,6 +156,7 @@ export class RawEditor implements EditorInterface {
                 for (const [key, value] of response.data.columns) {
                     columnMap.set(key, value);
                 }
+                local.status_code = 200;
                 local.results = new Results(response.data.results, columnMap); //response.data;
                 const endTime = new Date();
                 local.duration = endTime.getTime() - startTime.getTime();
@@ -163,8 +165,9 @@ export class RawEditor implements EditorInterface {
             // this.last_passed_query_text = current_query;
         } catch (error) {
             if (error instanceof Error) {
+
                 const resultCode = axiosHelpers.getResultCode(error);
-                this.status_code = resultCode;
+                local.status_code = resultCode;
                 local.error = axiosHelpers.getErrorMessage(error);
                 local.duration = null;
                 local.executed = false;

@@ -99,6 +99,14 @@ const actions = {
     },
     async addMonacoEditor({ commit }, data) {
         commit('addMonacoEditor', data)
+    },    
+    async editEditor({ commit, rootGetters }, data) {
+        const existing = rootGetters.getEditorByName(data.name)
+        if (!existing) {
+            throw Error(`Editor with the name ${data.name} does not exist!`)
+        }
+        commit('updateEditor', data);
+        commit('saveEditors', data)
     },
     async newEditor({ commit, rootGetters }, data) {
         const existing = rootGetters.getEditorByName(data.name)
@@ -175,6 +183,11 @@ const mutations = {
     },
     loadEditors(state, _) {
         state.editors = storageAPI.getEditors()
+    },
+    updateEditor(state, data) {
+        const newEditor = findMatchingValue(state.editors, (editor) => editor.name === data.name)
+        newEditor.connection = data.connection.name;
+        state.editors = state.editors.map(editor => editor.name === data.name ? newEditor : editor)
     },
     newEditor(state, data) {
         let newEd: Editor | RawEditor | null = null

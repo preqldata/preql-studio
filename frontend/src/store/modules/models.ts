@@ -24,7 +24,6 @@ const storageAPI = {
 
   getModels(): Array<Model> {
     const data = store.get(storageName, []) as Array<any>
-    console.log(data)
     const parsed = data.map(dict => {
       return LocalModel.fromJSON(dict)
     });

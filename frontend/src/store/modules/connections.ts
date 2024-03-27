@@ -10,6 +10,9 @@ import instance from '/src/api/instance'
 
 // import editorMap from '/src/store/modules/monaco'
 
+
+const unconnectedLabel = 'Unconnected';
+
 const store = new Store<Record<string, Object>>({
     name: 'connections',
     watch: true,
@@ -44,11 +47,17 @@ const state = {
     new Connection('bigquery_demo', 'bigquery', false, 'bigquery_demo')],
 };
 
+function addDefault(connections) {
+    return connections.concat([new Connection(unconnectedLabel, '', false, null)])
+}
+
 const getters = {
-    connections: state => state.connections,
+    connections: state => addDefault(state.connections),
     getConnectionByName: (state) => (name) => {
         return state.connections.find(conn => conn.name === name)
     },
+    unconnectedLabel: () => unconnectedLabel
+
 };
 
 function getConnectionArgument(rootGetters, data) {
